@@ -107,6 +107,7 @@ class Llvm < Formula
 
   keg_only :provided_by_osx
 
+  option :dsym
   option :universal
   option "with-clang", "Build the Clang compiler and support libraries"
   option "with-clang-extra-tools", "Build extra tools for Clang"
@@ -184,6 +185,8 @@ class Llvm < Formula
       ENV.permit_arch_flags
     end
 
+    commit_source
+
     args = %w[
       -DLLVM_OPTIMIZED_TABLEGEN=On
     ]
@@ -197,14 +200,14 @@ class Llvm < Formula
 
     args << "-DLINK_POLLY_INTO_TOOLS:Bool=ON" if build.with? "polly"
 
-    mktemp do
+    mkdir "build" do
       system "cmake", "-G", "Unix Makefiles", buildpath, *(std_cmake_args + args)
       system "make"
       system "make", "install"
     end
 
     if build.with? "clang"
-      (share/"clang/tools").install Dir["tools/clang/tools/scan-{build,view}"]
+      (share/"clang/tools").install Dir[buildpath/"tools/clang/tools/scan-{build,view}"]
       if build.head?
         inreplace "#{share}/clang/tools/scan-build/bin/scan-build", "$RealBin/bin/clang", "#{bin}/clang"
         bin.install_symlink share/"clang/tools/scan-build/bin/scan-build", share/"clang/tools/scan-view/bin/scan-view"

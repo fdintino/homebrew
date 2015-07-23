@@ -8,7 +8,7 @@ module CctoolsMachO
   # /usr/include/mach-o/loader.h
   # /usr/include/mach-o/fat.h
   # @private
-  def mach_data
+  def mach_data?
     @mach_data ||= begin
       offsets = []
       mach_data = []
@@ -27,7 +27,7 @@ module CctoolsMachO
       when 0xcefaedfe, 0xcffaedfe, 0xfeedface, 0xfeedfacf # Single arch
         offsets << 0
       else
-        raise "Not a Mach-O binary."
+        return nil
       end
 
       offsets.each do |offset|
@@ -54,8 +54,21 @@ module CctoolsMachO
     end
   end
 
+  def mach_data
+    data = mach_data?
+    if data == nil
+      raise "Not a Mach-O binary."
+    end
+    return data
+  end
+
   def archs
-    mach_data.map { |m| m.fetch :arch }.extend(ArchitectureListExtension)
+    data = mach_data?
+    if data == nil
+      []
+    else
+      mach_data.map { |m| m.fetch :arch }.extend(ArchitectureListExtension)
+    end
   end
 
   def arch
@@ -88,17 +101,32 @@ module CctoolsMachO
 
   # @private
   def dylib?
-    mach_data.any? { |m| m.fetch(:type) == :dylib }
+    data = mach_data?
+    if data == nil
+      return false
+    else
+      return data.any? { |m| m.fetch(:type) == :dylib }
+    end
   end
 
   # @private
   def mach_o_executable?
-    mach_data.any? { |m| m.fetch(:type) == :executable }
+    data = mach_data?
+    if data == nil
+      return false
+    else
+      return data.any? { |m| m.fetch(:type) == :executable }
+    end
   end
 
   # @private
   def mach_o_bundle?
-    mach_data.any? { |m| m.fetch(:type) == :bundle }
+    data = mach_data?
+    if data == nil
+      return false
+    else
+      return data.any? { |m| m.fetch(:type) == :bundle }
+    end
   end
 
   # @private

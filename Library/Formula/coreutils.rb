@@ -27,6 +27,8 @@ class Coreutils < Formula
     depends_on "wget" => :build
   end
 
+  option :dsym
+
   depends_on "gmp" => :optional
 
   def install
@@ -44,6 +46,7 @@ class Coreutils < Formula
     args = %W[
       --prefix=#{prefix}
       --program-prefix=g
+      -C
     ]
     args << "--without-gmp" if build.without? "gmp"
     system "./configure", *args
