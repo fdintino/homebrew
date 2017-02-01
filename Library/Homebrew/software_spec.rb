@@ -14,8 +14,9 @@ class SoftwareSpec
   extend Forwardable
 
   PREDEFINED_OPTIONS = {
-    universal: Option.new("universal", "Build a universal binary"),
-    cxx11:     Option.new("c++11",     "Build using C++11 mode"),
+    :universal => Option.new("universal", "Build a universal binary"),
+    :cxx11     => Option.new("c++11", "Build using C++11 mode"),
+    :dsym      => Option.new("dsym", "Build debug information and retain source"),
   }.freeze
 
   attr_reader :name, :full_name, :owner

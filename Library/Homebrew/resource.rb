@@ -99,11 +99,16 @@ class Resource
       downloader.stage
       @source_modified_time = downloader.source_modified_time
       apply_patches
-      if block_given?
+      if target==nil
         yield ResourceStageContext.new(self, staging)
       elsif target
         target = Pathname(target)
         target.install Pathname.pwd.children
+        if block_given?
+          chdir target do
+            yield ResourceStageContext.new(self, staging)
+          end
+        end
       end
     end
   end

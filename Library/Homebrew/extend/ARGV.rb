@@ -205,6 +205,10 @@ module HomebrewArgvExtension
     include? "--universal"
   end
 
+  def build_dsym?
+    include? '--dsym'
+  end
+
   def build_bottle?
     include?("--build-bottle") || !ENV["HOMEBREW_BUILD_BOTTLE"].nil?
   end

@@ -119,7 +119,7 @@ class Build
         staging.retain! if ARGV.keep_tmp?
         formula.patch
 
-        if ARGV.git?
+        if ARGV.git? or formula.build.dsym?
           system "git", "init"
           system "git", "add", "-A"
         end
@@ -136,11 +136,22 @@ class Build
 
           interactive_shell(formula)
         else
+          formula.commit_source
+
           formula.prefix.mkpath
 
           (formula.logs/"00.options.out").write \
             "#{formula.full_name} #{formula.build.used_options.sort.join(" ")}".strip
           formula.install
+
+          if formula.build.dsym?
+            formula.install_dsym
+            # pass in git-dir and work-tree just to make absolutely sure we don't
+            # take any chances of doing something this potentially destructive on
+            # the wrong directory (like /usr/local)
+            system "git", "--git-dir=#{Pathname.pwd}/.git", "--work-tree=#{Pathname.pwd}",
+            "clean", "-xd", "--force", "--quiet"
+          end
 
           stdlibs = detect_stdlibs(ENV.compiler)
           tab = Tab.create(formula, ENV.compiler, stdlibs.first)
@@ -149,6 +160,13 @@ class Build
           # Find and link metafiles
           formula.prefix.install_metafiles formula.buildpath
           formula.prefix.install_metafiles formula.libexec if formula.libexec.exist?
+
+          if formula.build.dsym?
+            # install_metafiles actually moves the files so if we're going to keep
+            # the source directory around then lets restore them.
+            system "git", "checkout", "."
+          end
+
         end
       end
     end

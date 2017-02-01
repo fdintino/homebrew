@@ -240,6 +240,10 @@ class Tab < OpenStruct
     include?("c++11")
   end
 
+  def dsym?
+    include?("dsym")
+  end
+
   def head?
     spec == :head
   end

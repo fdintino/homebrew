@@ -84,6 +84,11 @@ class BuildOptions
     include?("c++11") && option_defined?("c++11")
   end
 
+  # True if the user requested debug symbols.
+  def dsym?
+    include?("dsym") && option_defined?("dsym")
+  end
+
   # True if the build has any arguments or options specified.
   def any_args_or_options?
     !@args.empty? || !@options.empty?

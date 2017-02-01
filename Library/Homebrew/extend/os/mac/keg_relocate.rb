@@ -132,13 +132,17 @@ class Keg
     hardlinks = Set.new
     mach_o_files = []
     path.find do |pn|
-      next if pn.symlink? || pn.directory?
-      next unless pn.dylib? || pn.mach_o_bundle? || pn.mach_o_executable?
-      # if we've already processed a file, ignore its hardlinks (which have the same dev ID and inode)
-      # this prevents relocations from being performed on a binary more than once
-      next unless hardlinks.add? [pn.stat.dev, pn.stat.ino]
+      if pn == path/"Source"
+        Find.prune
+      else
+        next if pn.symlink? || pn.directory?
+        next unless pn.dylib? || pn.mach_o_bundle? || pn.mach_o_executable?
+        # if we've already processed a file, ignore its hardlinks (which have the same dev ID and inode)
+        # this prevents relocations from being performed on a binary more than once
+        next unless hardlinks.add? [pn.stat.dev, pn.stat.ino]
 
-      mach_o_files << pn
+        mach_o_files << pn
+      end
     end
 
     mach_o_files
